@@ -1,0 +1,5 @@
+basic icecast client used like this:
+ffmpeg2theora -v 5 -a -1  -x 160 -y 128 movie.avi -o /dev/stdout | oggfwd icecast 8000 pwd /theora.ogg
+
+needs libshout-2.1+svn from svn[http://svn.xiph.org/icecast/trunk/libshout]
+or http://v2v.cc/~j/ffmpeg2theora/oggfwd/libshout-2.1+svn.tar.gz
