@@ -1,5 +1,42 @@
-basic icecast client used like this:
-ffmpeg2theora -v 5 -a -1  -x 160 -y 128 movie.avi -o /dev/stdout | oggfwd icecast 8000 pwd /theora.ogg
+oggfwd:
+A basic icecast client that is very simple but also very useful for video streaming :-)
+It has some metadata information not included in the original oggfwd. 
 
-needs libshout-2.1+svn from svn[http://svn.xiph.org/icecast/trunk/libshout]
-or http://v2v.cc/~j/ffmpeg2theora/oggfwd/libshout-2.1+svn.tar.gz
+Dependencies:
+- libshout >= 2.1 
+- libogg
+- libvorbis
+- libtheora
+
+Homepage:
+ http://www.v2v.cc/~j/ffmpeg2theora/oggfwd
+
+Basic help:
+
+================
+...|> Simple Usage: 
+ oggfwd server_address port_number password target
+Sample:
+ oggfwd icecast.v2v.cc 8000 password /theora.ogg
+
+...|> Advanced Usage:
+Use strings (a single word or a "w o r d" with spaces, inside " " ) or use the
+possible values available inside the parentheses: -> 0 means False | 1 means True <-
+
+Command Format:
+ oggfwd server_address port_number password mount_point radio_name url genre description set_public(0,1) dump_file(0,dump_file_name) 
+
+Sample:
+ oggfwd orelhao.radiolivre.org 8100 secret_password /mount_point.ogg "Radio Freak" http://doidos.radiolivre.org/ free_style "A Radio dos doid@s" 1 /tmp/dumpfile.ogg 
+================
+
+License:
+see ./LICENSE
+
+OggFWD author:
+J^ <j@v2v.cc> 
+
+Improvements author:
+rafael2k <rafael@riseup.net>
+
+
