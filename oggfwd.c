@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,11 @@ extern char    *__progname;
 extern char    *optarg;
 extern int	optind;
 extern int	errno;
+
+volatile sig_atomic_t	print_total = 0;
+volatile sig_atomic_t	quit = 0;
+
+#define BUFFERSIZE	4096
 
 #if defined(__dead)
 __dead void
@@ -49,6 +55,23 @@ usage(void)
 	       "              address port password mountpoint\n",
 	       __progname);
 	exit(1);
+}
+
+void
+sig_handler(int sig)
+{
+	switch (sig) {
+	case SIGHUP:
+		print_total = 1;
+		break;
+	case SIGTERM:
+	case SIGINT:
+		quit = 1;
+		break;
+	default:
+		/* ignore */
+		break;
+	}
 }
 
 void
@@ -81,12 +104,13 @@ int
 main(int argc, char **argv)
 {
 	shout_t        *shout;
-	unsigned char	buff[4096];
+	unsigned char	buff[BUFFERSIZE];
 	int		ret, ch;
 	unsigned int	pFlag;
 	char	       *dump_filename, *description, *genre, *name, *url;
-	size_t		bytes_read, total;
+	size_t		bytes_read;
 	unsigned short	port;
+	unsigned long long total;
 
 	pFlag = 0;
 	dump_filename = description = genre = name = url = NULL;
@@ -177,9 +201,14 @@ main(int argc, char **argv)
 		shout_set_url(shout, url);
 
 	if (shout_open(shout) == SHOUTERR_SUCCESS) {
-		printf("%s: Connected to server...\n", __progname);
+		printf("%s: Connected to server\n", __progname);
 		total = 0;
-		for (;;) {
+
+		signal(SIGHUP, sig_handler);
+		signal(SIGTERM, sig_handler);
+		signal(SIGINT, sig_handler);
+
+		while (quit == 0) {
 			bytes_read = fread(buff, 1, sizeof(buff), stdin);
 			total += bytes_read;
 
@@ -189,15 +218,26 @@ main(int argc, char **argv)
 					printf("%s: Send error: %s\n",
 					       __progname,
 					       shout_get_error(shout));
-					break;
+					quit = 1;
 				}
 			} else
-				break;
+				quit = 1;
+
+			if (quit) {
+				printf("%s: Quitting ...\n", __progname);
+				print_total = 1;
+			}
+
+			if (print_total) {
+				printf("%s: Total bytes read: %llu\n",
+				       __progname, total);
+				print_total = 0;
+			}
 
 			shout_sync(shout);
 		}
 	} else
-		printf("%s: Error connecting: %s\n", __progname,
+		fprintf(stderr, "%s: Error connecting: %s\n", __progname,
 		       shout_get_error(shout));
 
 	shout_close(shout);

@@ -69,6 +69,12 @@ Allow the stream to be made public in stream directories.
 .It Fl u Ar URL
 Set the stream URL.
 .El
+.Pp
+Also,
+.Nm
+reacts to the hangup signal, SIGHUP, by printing the amount of bytes read from
+stdin to stdout at the next given opportunity.
+How fast it reacts depends on the stream's current bitrate.
 .Sh EXAMPLE
 To forward a public Ogg stream with the name
 .Dq Test radio
