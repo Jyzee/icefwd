@@ -1,0 +1,99 @@
+.\" Copyright (C) 2006 Moritz Grimm <gtgbr@gmx.net>
+.\"
+.\" The following legalese applies to this manual only:
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF MIND, USE, DATA OR PROFITS, WHETHER IN
+.\" AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+.\" OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd July 30, 2006
+.Dt OGGFWD 1
+.Os
+.Sh NAME
+.Nm oggfwd
+.Nd "pipe an Ogg stream from stdin to an Icecast server"
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl hp
+.Op Fl d Ar filename
+.Op Fl D Ar description
+.Op Fl g Ar genre
+.Op Fl n Ar name
+.Op Fl u Ar URL
+.Ar address
+.Ar port
+.Ar password
+.Ar mountpoint
+.Ek
+.Sh DESCRIPTION
+The
+.Nm
+utility acts as a minimal source client for Icecast servers.
+It reads an Ogg stream from stdin and forwards it to a server specified on the
+command line.
+.Pp
+The
+.Ar address ,
+.Ar port ,
+.Ar password
+and
+.Ar mountpoint
+arguments are mandatory and have to be given in that order.
+.Ss Optional command line parameters
+.Bl -tag -width Ds
+.It Fl d Ar filename
+Dump the stream to
+.Ar filename
+in addition to forwarding it to the server.
+.It Fl D Ar description
+Set the stream description.
+.It Fl g Ar genre
+Set the stream genre.
+.It Fl h
+Print a short usage summay.
+.It Fl n Ar name
+Set the stream
+.Pq i.e. radio
+name.
+.It Fl p
+Allow the stream to be made public in stream directories.
+.It Fl u Ar URL
+Set the stream URL.
+.El
+.Sh EXAMPLE
+To forward a public Ogg stream with the name
+.Dq Test radio
+to an Icecast server, one would pipe that stream to an
+.Nm
+command line such as
+.Pp
+.Bd -offset indent
+.Cm oggfwd -p -n \&"Test radio\&" radio.example.com 8000 password /stream.ogg
+.Ed
+.Sh AUTHORS
+Programming by
+.Bl -item -offset indent -compact
+.It
+J^ <j@v2v.cc>
+.It
+rafael2k <rafael@riseup.net>
+.It
+Moritz Grimm <gtgbr@gmx.net>
+.El
+.Pp
+This manual was contributed by
+.An Moritz Grimm .
+.Sh CAVEATS
+Since the password to the Icecast server is given in clear text on the command
+line, other
+.Pq local
+users will probably be able to see it very easily.

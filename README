@@ -11,24 +11,7 @@ Dependencies:
 Homepage:
  http://www.v2v.cc/~j/ffmpeg2theora/oggfwd
 
-Basic help:
-
-================
-...|> Simple Usage: 
- oggfwd server_address port_number password target
-Sample:
- oggfwd icecast.v2v.cc 8000 password /theora.ogg
-
-...|> Advanced Usage:
-Use strings (a single word or a "w o r d" with spaces, inside " " ) or use the
-possible values available inside the parentheses: -> 0 means False | 1 means True <-
-
-Command Format:
- oggfwd server_address port_number password mount_point radio_name url genre description set_public(0,1) dump_file(0,dump_file_name) 
-
-Sample:
- oggfwd orelhao.radiolivre.org 8100 secret_password /mount_point.ogg "Radio Freak" http://doidos.radiolivre.org/ free_style "A Radio dos doid@s" 1 /tmp/dumpfile.ogg 
-================
+See the included man page for detailed instructions.
 
 License:
 see ./LICENSE
@@ -38,5 +21,3 @@ J^ <j@v2v.cc>
 
 Improvements author:
 rafael2k <rafael@riseup.net>
-
-
