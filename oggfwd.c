@@ -8,7 +8,7 @@
  * This program is provided "as-is", with no explicit or implied warranties of
  * any kind.
  *
- * Copyright (C) 2006,		J <j@v2v.cc>,
+ * Copyright (C) 2003-2006,	J <j@v2v.cc>,
  *				rafael2k <rafael(at)riseup(dot)net>,
  *				Moritz Grimm <gtgbr@gmx.net>
  */
@@ -47,8 +47,7 @@ usage(void)
 {
 	printf("usage: %s "
 	       "[-hp] "
-	       "[-d filename] "
-	       "[-D description] "
+	       "[-d description] "
 	       "[-g genre] "
 	       "[-n name] "
 	       "[-u URL]\n"
@@ -107,19 +106,16 @@ main(int argc, char **argv)
 	unsigned char	buff[BUFFERSIZE];
 	int		ret, ch;
 	unsigned int	pFlag;
-	char	       *dump_filename, *description, *genre, *name, *url;
+	char	       *description, *genre, *name, *url;
 	size_t		bytes_read;
 	unsigned short	port;
 	unsigned long long total;
 
 	pFlag = 0;
-	dump_filename = description = genre = name = url = NULL;
-	while ((ch = getopt(argc, argv, "d:D:g:hn:pu:")) != -1) {
+	description = genre = name = url = NULL;
+	while ((ch = getopt(argc, argv, "d:g:hn:pu:")) != -1) {
 		switch (ch) {
 		case 'd':
-			set_argument_string(&dump_filename, optarg, 'd');
-			break;
-		case 'D':
 			set_argument_string(&description, optarg, 'D');
 			break;
 		case 'g':
@@ -184,9 +180,6 @@ main(int argc, char **argv)
 	shout_set_format(shout, SHOUT_FORMAT_VORBIS);
 
 	shout_set_public(shout, pFlag);
-
-	if (dump_filename)
-		shout_set_dumpfile(shout, dump_filename);
 
 	if (description)
 		shout_set_description(shout, description);

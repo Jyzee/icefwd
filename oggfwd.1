@@ -24,8 +24,7 @@
 .Nm
 .Bk -words
 .Op Fl hp
-.Op Fl d Ar filename
-.Op Fl D Ar description
+.Op Fl d Ar description
 .Op Fl g Ar genre
 .Op Fl n Ar name
 .Op Fl u Ar URL
@@ -50,11 +49,7 @@ and
 arguments are mandatory and have to be given in that order.
 .Ss Optional command line parameters
 .Bl -tag -width Ds
-.It Fl d Ar filename
-Dump the stream to
-.Ar filename
-in addition to forwarding it to the server.
-.It Fl D Ar description
+.It Fl d Ar description
 Set the stream description.
 .It Fl g Ar genre
 Set the stream genre.
@@ -70,20 +65,26 @@ Allow the stream to be made public in stream directories.
 Set the stream URL.
 .El
 .Pp
-Also,
 .Nm
 reacts to the hangup signal, SIGHUP, by printing the amount of bytes read from
 stdin to stdout at the next given opportunity.
 How fast it reacts depends on the stream's current bitrate.
-.Sh EXAMPLE
+.Sh EXAMPLES
 To forward a public Ogg stream with the name
 .Dq Test radio
 to an Icecast server, one would pipe that stream to an
 .Nm
 command line such as
 .Pp
-.Bd -offset indent
-.Cm oggfwd -p -n \&"Test radio\&" radio.example.com 8000 password /stream.ogg
+.Bd -literal -offset 4n
+oggfwd -p -n \&"Test radio\&" radio.example.com 8000 password /stream.ogg
+.Ed
+.Pp
+Encode an Ogg Vorbis stream, dump it to disk and stream it at the same time:
+.Pp
+.Bd -literal -offset 4n
+oggenc - < input.wav | tee streamdump.ogg \e
+    | oggfwd radio.example.com 8000 password /stream.ogg
 .Ed
 .Sh AUTHORS
 Programming by
