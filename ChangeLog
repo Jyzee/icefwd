@@ -1,6 +1,13 @@
 0.2
- - manpage and cleanups by Moritz Grimm <gtgbr@gmx.net>
-
+  * Makefile: rewrite; more packager-friendly
+  * man page
+  * use getopt() for advanced settings
+  * remove "dump file" feature, it is not implemented in libshout. explain
+    tee(1) usage instead
+  * signal handling to print "total bytes read" stats
+  * write all errors to stderr, regular output to stdout. Redirecting output
+    to /dev/null makes oggfwd silent, except when errors occur
+  * lint + -Wall clean
 0.1
-  - add advanced features by rafael2k <rafael@riseup.net>
-  - initial version
+  * add advanced features by rafael2k <rafael@riseup.net>
+  * initial version

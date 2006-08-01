@@ -28,4 +28,4 @@ install: ${PROG}
 	${INSTALL} -c -m 444 -o root -g bin ${MAN} ${MAN1DIR}
 
 clean:
-	-@rm ${PROG} *~ core *.core
+	-@rm -f ${PROG} *~ core *.core
