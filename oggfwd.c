@@ -229,9 +229,11 @@ main(int argc, char **argv)
 
 			shout_sync(shout);
 		}
-	} else
+	} else {
 		fprintf(stderr, "%s: Error connecting: %s\n", __progname,
 		       shout_get_error(shout));
+		return 1;
+	}
 
 	shout_close(shout);
 
