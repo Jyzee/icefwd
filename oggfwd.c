@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #ifndef NO_UNISTD_H
 #  include <unistd.h>
@@ -36,6 +38,10 @@ extern int	errno;
 volatile sig_atomic_t	print_total = 0;
 volatile sig_atomic_t	quit = 0;
 
+#define METABUFSIZE 4096
+char    *metafilename;
+shout_t *shout;
+
 #define BUFFERSIZE	4096
 
 #if defined(__dead)
@@ -47,6 +53,7 @@ usage(void)
 {
 	printf("usage: %s "
 	       "[-hp] "
+	       "[-m metadata file] "
 	       "[-d description] "
 	       "[-g genre] "
 	       "[-n name] "
@@ -54,6 +61,96 @@ usage(void)
 	       "              address port password mountpoint\n",
 	       __progname);
 	exit(1);
+}
+
+
+void 
+load_metadata()
+{
+  int i, fh, r;
+  char buf[METABUFSIZE], *key, *val;
+  enum {state_comment, state_key, state_value, state_unknown} state;
+
+  bzero(buf, METABUFSIZE);
+
+  if (!metafilename) {
+    fprintf(stderr, "Please use the -m argument to set the meta file name!\n");
+    return;
+  }
+
+  fh = open(metafilename, O_RDONLY);
+
+  if (-1==fh) {
+    fprintf(stderr, "Error while opening meta file \"%s\": %s\n", metafilename, strerror(errno));
+    return;
+  }
+
+  r = read(fh, &buf, METABUFSIZE);
+  if (-1==r) {
+    fprintf(stderr, "Error while reading meta file \"%s\": %s\n", metafilename, strerror(errno));
+    close(fh);
+    return;
+  }
+
+  state = state_unknown;
+  key = val = NULL;
+  i = 0;
+
+  while (i<METABUFSIZE) {
+    switch (buf[i]) {
+    case 0:
+      /* we're done */
+      i = METABUFSIZE;
+      break;
+
+    case '\r':
+    case '\n':
+      if (state_value==state) {
+	buf[i] = 0;
+	
+	if (key && val) {
+	  if (0==strcmp("name", key)) {
+	    shout_set_name(shout, val);
+	  } else if (0==strcmp("genre", key)) {
+	    shout_set_genre(shout, val);
+	  } else if (0==strcmp("description", key)) {
+	    shout_set_description(shout, val);
+	  } else if (0==strcmp("url", key)) {
+	    shout_set_url(shout, val);
+	  }
+	}
+      }
+
+      state = state_unknown;
+      key = NULL;
+      val = NULL;
+      break;
+
+    case '=':
+      if (state_key==state) {
+	buf[i] = 0;
+	state = state_value;
+	val = &buf[i+1];
+      }
+      break;
+
+    case '#':
+      if (state_unknown==state) {
+	state = state_comment;
+      }
+      break;
+      
+    default:
+      if (state_unknown==state) {
+	state = state_key;
+	key = &buf[i];
+      }
+    }
+    
+    i++;
+  }
+
+  close(fh);
 }
 
 void
@@ -67,6 +164,9 @@ sig_handler(int sig)
 	case SIGINT:
 		quit = 1;
 		break;
+	case SIGUSR1:
+	        load_metadata();
+		break;	  
 	default:
 		/* ignore */
 		break;
@@ -102,7 +202,6 @@ set_argument_string(char **param, char *opt, char optname)
 int
 main(int argc, char **argv)
 {
-	shout_t        *shout;
 	unsigned char	buff[BUFFERSIZE];
 	int		ret, ch;
 	unsigned int	pFlag;
@@ -112,8 +211,8 @@ main(int argc, char **argv)
 	unsigned long long total;
 
 	pFlag = 0;
-	description = genre = name = url = NULL;
-	while ((ch = getopt(argc, argv, "d:g:hn:pu:")) != -1) {
+	description = genre = name = url = metafilename = NULL;
+	while ((ch = getopt(argc, argv, "d:g:hnm:pu:")) != -1) {
 		switch (ch) {
 		case 'd':
 			set_argument_string(&description, optarg, 'D');
@@ -124,6 +223,9 @@ main(int argc, char **argv)
 		case 'n':
 			set_argument_string(&name, optarg, 'n');
 			break;
+		case 'm':
+     		        set_argument_string(&metafilename, optarg, 'm');
+		        break;
 		case 'p':
 			pFlag = 1;
 			break;
@@ -181,6 +283,9 @@ main(int argc, char **argv)
 
 	shout_set_public(shout, pFlag);
 
+	if (metafilename)
+       	        load_metadata();
+
 	if (description)
 		shout_set_description(shout, description);
 
@@ -192,6 +297,8 @@ main(int argc, char **argv)
 
 	if (url)
 		shout_set_url(shout, url);
+
+	signal(SIGUSR1, sig_handler);
 
 	if (shout_open(shout) == SHOUTERR_SUCCESS) {
 		printf("%s: Connected to server\n", __progname);
