@@ -1,3 +1,5 @@
+/*  vi:si:noexpandtab:sw=4:sts=4:ts=4
+*/
 /*
  * oggfwd    -- Forward an Ogg stream from stdin to an Icecast server
  *		A useful demonstration of the libshout API
@@ -206,7 +208,7 @@ main(int argc, char **argv)
 	int		ret, ch;
 	unsigned int	pFlag;
 	char	       *description, *genre, *name, *url;
-	size_t		bytes_read;
+	size_t		bytes_read = 0;
 	unsigned short	port;
 	unsigned long long total;
 
@@ -300,6 +302,9 @@ main(int argc, char **argv)
 
 	signal(SIGUSR1, sig_handler);
 
+	//wait for data before opening connection to server
+	bytes_read = fread(buff, 1, sizeof(buff), stdin);
+
 	if (shout_open(shout) == SHOUTERR_SUCCESS) {
 		printf("%s: Connected to server\n", __progname);
 		total = 0;
@@ -309,7 +314,6 @@ main(int argc, char **argv)
 		signal(SIGINT, sig_handler);
 
 		while (quit == 0) {
-			bytes_read = fread(buff, 1, sizeof(buff), stdin);
 			total += bytes_read;
 
 			if (bytes_read > 0) {
@@ -335,6 +339,8 @@ main(int argc, char **argv)
 			}
 
 			shout_sync(shout);
+
+			bytes_read = fread(buff, 1, sizeof(buff), stdin);
 		}
 	} else {
 		fprintf(stderr, "%s: Error connecting: %s\n", __progname,
