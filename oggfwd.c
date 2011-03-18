@@ -278,7 +278,7 @@ main(int argc, char **argv)
 	if (shout_set_mount(shout, argv[3]) != SHOUTERR_SUCCESS) {
 		fprintf(stderr, "%s: Error setting mount: %s\n", __progname,
 			shout_get_error(shout));
-		return 1;
+		return (1);
 	}
 
 	shout_set_format(shout, SHOUT_FORMAT_VORBIS);
@@ -341,11 +341,14 @@ main(int argc, char **argv)
 			shout_sync(shout);
 
 			bytes_read = fread(buff, 1, sizeof(buff), stdin);
+			if (bytes_read != sizeof(buff) && feof(stdin)) {
+				quit = 1;
+			}
 		}
 	} else {
 		fprintf(stderr, "%s: Error connecting: %s\n", __progname,
 		       shout_get_error(shout));
-		return 1;
+		return (1);
 	}
 
 	shout_close(shout);
