@@ -214,7 +214,7 @@ main(int argc, char **argv)
 
 	pFlag = 0;
 	description = genre = name = url = metafilename = NULL;
-	while ((ch = getopt(argc, argv, "d:g:hnm:pu:")) != -1) {
+	while ((ch = getopt(argc, argv, "d:g:hn:m:pu:")) != -1) {
 		switch (ch) {
 		case 'd':
 			set_argument_string(&description, optarg, 'D');
