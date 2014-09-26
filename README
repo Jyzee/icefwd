@@ -1,6 +1,6 @@
-oggfwd:
-A basic icecast client that is very simple but also very useful for video streaming :-)
-It has some metadata information not included in the original oggfwd. 
+oggfwd - pipe media into icecast
+
+A basic icecast client that is very simple but also very useful for video streaming.
 
 Dependencies:
 - libshout >= 2.1 
@@ -9,12 +9,12 @@ Dependencies:
 - libtheora
 
 Homepage:
- http://www.v2v.cc/~j/ffmpeg2theora/oggfwd
+ http://www.v2v.cc/~j/oggfwd
 
 See the included man page for detailed instructions.
 
 License:
-see ./LICENSE
+see GPL 2 (see LICENSE)
 
 OggFWD author:
 J^ <j@v2v.cc> 
