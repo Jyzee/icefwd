@@ -1,6 +1,6 @@
-PROG =		oggfwd
-SRC =		oggfwd.c
-MAN =		oggfwd.1
+PROG =		icefwd
+SRC =		icefwd.c
+MAN =		icefwd.1
 
 PREFIX ?=	/usr/local
 BINDIR ?=	${PREFIX}/bin
@@ -15,7 +15,7 @@ INSTALL =	install
 PTHREADFLAGS ?=	-pthread
 INCLUDEFLAGS ?=	-I${PREFIX}/include
 LINKFLAGS ?=	-L${PREFIX}/lib
-LINKFLAGS +=    -lshout -logg -lvorbis -ltheora -lspeex
+LINKFLAGS +=	-lshout -logg -lvorbis -ltheora -lspeex
 
 all: ${PROG}
 
