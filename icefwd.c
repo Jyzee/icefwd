@@ -1,8 +1,6 @@
-/*  vi:si:noexpandtab:sw=4:sts=4:ts=4
-*/
 /*
- * oggfwd    -- Forward an Ogg stream from stdin to an Icecast server
- *		A useful demonstration of the libshout API
+ * icefwd -- Forward an Ogg/WebM stream from stdin to an Icecast server
+ *    A useful demonstration of the libshout API
  *
  * This program is distributed under the GNU General Public License, version 2.
  * A copy of this license is included with this source.
@@ -10,11 +8,12 @@
  * This program is provided "as-is", with no explicit or implied warranties of
  * any kind.
  *
- * Copyright (C) 2003-2006,	J <j@v2v.cc>,
- *				rafael2k <rafael(at)riseup(dot)net>,
- *				Moritz Grimm <gtgbr@gmx.net>
+ * Copyright (C) 2003-2006, J <j@v2v.cc>,
+ *                          rafael2k <rafael(at)riseup(dot)net>,
+ *                          Moritz Grimm <gtgbr@gmx.net>
+ *
+ * thanx to rhatto <rhatto (AT) riseup (DOT) net> and others at submidialogia :-P
  */
-/* thanx to rhatto <rhatto (AT) riseup (DOT) net> and others at submidialogia :-P */
 
 #include <sys/types.h>
 #include <sys/param.h>
@@ -27,24 +26,24 @@
 #include <fcntl.h>
 
 #ifndef NO_UNISTD_H
-#  include <unistd.h>
-#endif /* no-NO_UNISTD_H */
+#include <unistd.h>
+#endif
 
 #include <shout/shout.h>
 
-extern char    *__progname;
-extern char    *optarg;
-extern int	optind;
-extern int	errno;
+extern char *__progname;
+extern char *optarg;
+extern int optind;
+extern int errno;
 
-volatile sig_atomic_t	print_total = 0;
-volatile sig_atomic_t	quit = 0;
+volatile sig_atomic_t print_total = 0;
+volatile sig_atomic_t quit = 0;
 
 #define METABUFSIZE 4096
-char    *metafilename;
+char *metafilename;
 shout_t *shout;
 
-#define BUFFERSIZE	4096
+#define BUFFERSIZE 4096
 
 #if defined(__dead)
 __dead void
@@ -65,131 +64,119 @@ usage(void)
 	exit(1);
 }
 
+void load_metadata() {
+	int i, fh, r;
+	char buf[METABUFSIZE], *key, *val;
+	enum {
+		state_comment,
+		state_key,
+		state_value,
+		state_unknown
+	} state;
 
-void 
-load_metadata()
-{
-  int i, fh, r;
-  char buf[METABUFSIZE], *key, *val;
-  enum {state_comment, state_key, state_value, state_unknown} state;
+	bzero(buf, METABUFSIZE);
 
-  bzero(buf, METABUFSIZE);
-
-  if (!metafilename) {
-    fprintf(stderr, "Please use the -m argument to set the meta file name!\n");
-    return;
-  }
-
-  fh = open(metafilename, O_RDONLY);
-
-  if (-1==fh) {
-    fprintf(stderr, "Error while opening meta file \"%s\": %s\n", metafilename, strerror(errno));
-    return;
-  }
-
-  r = read(fh, &buf, METABUFSIZE);
-  if (-1==r) {
-    fprintf(stderr, "Error while reading meta file \"%s\": %s\n", metafilename, strerror(errno));
-    close(fh);
-    return;
-  }
-
-  state = state_unknown;
-  key = val = NULL;
-  i = 0;
-
-  while (i<METABUFSIZE) {
-    switch (buf[i]) {
-    case 0:
-      /* we're done */
-      i = METABUFSIZE;
-      break;
-
-    case '\r':
-    case '\n':
-      if (state_value==state) {
-	buf[i] = 0;
-	
-	if (key && val) {
-	  if (0==strcmp("name", key)) {
-	    shout_set_name(shout, val);
-	  } else if (0==strcmp("genre", key)) {
-	    shout_set_genre(shout, val);
-	  } else if (0==strcmp("description", key)) {
-	    shout_set_description(shout, val);
-	  } else if (0==strcmp("url", key)) {
-	    shout_set_url(shout, val);
-	  }
+	if (!metafilename) {
+		fprintf(stderr, "Please use the -m argument to set the meta file name!\n");
+		return;
 	}
-      }
 
-      state = state_unknown;
-      key = NULL;
-      val = NULL;
-      break;
+	fh = open(metafilename, O_RDONLY);
 
-    case '=':
-      if (state_key==state) {
-	buf[i] = 0;
-	state = state_value;
-	val = &buf[i+1];
-      }
-      break;
+	if (-1 == fh) {
+		fprintf(stderr, "Error while opening meta file \"%s\": %s\n", metafilename, strerror(errno));
+		return;
+	}
 
-    case '#':
-      if (state_unknown==state) {
-	state = state_comment;
-      }
-      break;
-      
-    default:
-      if (state_unknown==state) {
-	state = state_key;
-	key = &buf[i];
-      }
-    }
-    
-    i++;
-  }
+	r = read(fh, &buf, METABUFSIZE);
+	if (-1 == r) {
+		fprintf(stderr, "Error while reading meta file \"%s\": %s\n", metafilename, strerror(errno));
+		close(fh);
+		return;
+	}
 
-  close(fh);
+	state = state_unknown;
+	key = val = NULL;
+	i = 0;
+
+	while (i < METABUFSIZE) {
+		switch (buf[i]) {
+			case 0:
+				/* we're done */
+				i = METABUFSIZE;
+				break;
+			case '\r':
+			case '\n':
+				if (state_value == state) {
+					buf[i] = 0;
+
+					if (key && val) {
+						if (strcmp("name", key) == 0) {
+							shout_set_name(shout, val);
+						} else if (strcmp("genre", key) == 0) {
+							shout_set_genre(shout, val);
+						} else if (strcmp("description", key) == 0) {
+							shout_set_description(shout, val);
+						} else if (strcmp("url", key) == 0) {
+							shout_set_url(shout, val);
+						}
+					}
+				}
+				state = state_unknown;
+				key = NULL;
+				val = NULL;
+				break;
+			case '=':
+				if (state_key == state) {
+					buf[i] = 0;
+					state = state_value;
+					val = &buf[i+1];
+				}
+				break;
+			case '#':
+				if (state_unknown == state) {
+					state = state_comment;
+				}
+				break;
+			default:
+				if (state_unknown == state) {
+					state = state_key;
+					key = &buf[i];
+				}
+		}
+
+		i++;
+	}
+
+	close(fh);
 }
 
-void
-sig_handler(int sig)
-{
+void sig_handler(int sig) {
 	switch (sig) {
-	case SIGHUP:
-		print_total = 1;
-		break;
-	case SIGTERM:
-	case SIGINT:
-		quit = 1;
-		break;
-	case SIGUSR1:
-	        load_metadata();
-		break;	  
-	default:
-		/* ignore */
-		break;
+		case SIGHUP:
+			print_total = 1;
+			break;
+		case SIGTERM:
+		case SIGINT:
+			quit = 1;
+			break;
+		case SIGUSR1:
+			load_metadata();
+			break;
 	}
 }
 
-void
-set_argument_string(char **param, char *opt, char optname)
-{
+void set_argument_string(char **param, char *opt, char optname) {
 	size_t siz;
 
 	if (*param) {
-		fprintf(stderr, "%s: Parameter -%c given multiple times\n",
-			__progname, optname);
+		fprintf(stderr, "%s: Parameter -%c given multiple times\n", __progname, optname);
 		usage();
 	}
 
 	siz = strlen(opt) + 1;
 	if (siz >= MAXPATHLEN) {
-		fprintf(stderr, "%s: Argument for parameter -%c too long\n",
-			__progname, optname);
+		fprintf(stderr, "%s: Argument for parameter -%c too long\n", __progname, optname);
 		exit(1);
 	}
 
@@ -201,42 +188,40 @@ set_argument_string(char **param, char *opt, char optname)
 	snprintf(*param, siz, "%s", opt);
 }
 
-int
-main(int argc, char **argv)
-{
-	unsigned char	buff[BUFFERSIZE];
-	int		ret, ch;
-	unsigned int	pFlag;
-	char	       *description, *genre, *name, *url;
-	size_t		bytes_read = 0;
-	unsigned short	port;
+int main(int argc, char **argv) {
+	unsigned char buff[BUFFERSIZE];
+	int ret, ch;
+	unsigned int pFlag;
+	char *description, *genre, *name, *url;
+	size_t bytes_read = 0;
+	unsigned short port;
 	unsigned long long total;
 
 	pFlag = 0;
 	description = genre = name = url = metafilename = NULL;
 	while ((ch = getopt(argc, argv, "d:g:hn:m:pu:")) != -1) {
 		switch (ch) {
-		case 'd':
-			set_argument_string(&description, optarg, 'D');
-			break;
-		case 'g':
-			set_argument_string(&genre, optarg, 'g');
-			break;
-		case 'n':
-			set_argument_string(&name, optarg, 'n');
-			break;
-		case 'm':
-     		        set_argument_string(&metafilename, optarg, 'm');
-		        break;
-		case 'p':
-			pFlag = 1;
-			break;
-		case 'u':
-			set_argument_string(&url, optarg, 'u');
-			break;
-		case 'h':
-		default:
-			usage();
+			case 'd':
+				set_argument_string(&description, optarg, 'D');
+				break;
+			case 'g':
+				set_argument_string(&genre, optarg, 'g');
+				break;
+			case 'n':
+				set_argument_string(&name, optarg, 'n');
+				break;
+			case 'm':
+				set_argument_string(&metafilename, optarg, 'm');
+				break;
+			case 'p':
+				pFlag = 1;
+				break;
+			case 'u':
+				set_argument_string(&url, optarg, 'u');
+				break;
+			case 'h':
+			default:
+				usage();
 		}
 	}
 	argc -= optind;
@@ -248,37 +233,33 @@ main(int argc, char **argv)
 	}
 
 	if ((shout = shout_new()) == NULL) {
-		fprintf(stderr, "%s: Could not allocate shout_t\n",
-			__progname);
-		return (1);
+		fprintf(stderr, "%s: Could not allocate shout_t\n", __progname);
+		return 1;
 	}
 
 	if (shout_set_host(shout, argv[0]) != SHOUTERR_SUCCESS) {
-		fprintf(stderr, "%s: Error setting hostname: %s\n", __progname,
-			shout_get_error(shout));
-		return (1);
+		fprintf(stderr, "%s: Error setting hostname: %s\n", __progname, shout_get_error(shout));
+		return 1;
 	}
 
 	if (sscanf(argv[1], "%hu", &port) != 1) {
 		fprintf(stderr, "Invalid port `%s'\n", argv[1]);
 		usage();
 	}
+
 	if (shout_set_port(shout, port) != SHOUTERR_SUCCESS) {
-		fprintf(stderr, "%s: Error setting port: %s\n", __progname,
-			shout_get_error(shout));
-		return (1);
+		fprintf(stderr, "%s: Error setting port: %s\n", __progname, shout_get_error(shout));
+		return 1;
 	}
 
 	if (shout_set_password(shout, argv[2]) != SHOUTERR_SUCCESS) {
-		fprintf(stderr, "%s: Error setting password: %s\n", __progname,
-			shout_get_error(shout));
-		return (1);
+		fprintf(stderr, "%s: Error setting password: %s\n", __progname, shout_get_error(shout));
+		return 1;
 	}
 
 	if (shout_set_mount(shout, argv[3]) != SHOUTERR_SUCCESS) {
-		fprintf(stderr, "%s: Error setting mount: %s\n", __progname,
-			shout_get_error(shout));
-		return (1);
+		fprintf(stderr, "%s: Error setting mount: %s\n", __progname, shout_get_error(shout));
+		return 1;
 	}
 
 	shout_set_format(shout, SHOUT_FORMAT_VORBIS);
@@ -286,7 +267,7 @@ main(int argc, char **argv)
 	shout_set_public(shout, pFlag);
 
 	if (metafilename)
-       	        load_metadata();
+		load_metadata();
 
 	if (description)
 		shout_set_description(shout, description);
@@ -319,13 +300,12 @@ main(int argc, char **argv)
 			if (bytes_read > 0) {
 				ret = shout_send(shout, buff, bytes_read);
 				if (ret != SHOUTERR_SUCCESS) {
-					printf("%s: Send error: %s\n",
-					       __progname,
-					       shout_get_error(shout));
+					printf("%s: Send error: %s\n", __progname, shout_get_error(shout));
 					quit = 1;
 				}
-			} else
+			} else {
 				quit = 1;
+			}
 
 			if (quit) {
 				printf("%s: Quitting ...\n", __progname);
@@ -333,25 +313,22 @@ main(int argc, char **argv)
 			}
 
 			if (print_total) {
-				printf("%s: Total bytes read: %llu\n",
-				       __progname, total);
+				printf("%s: Total bytes read: %llu\n", __progname, total);
 				print_total = 0;
 			}
 
 			shout_sync(shout);
 
 			bytes_read = fread(buff, 1, sizeof(buff), stdin);
-			if (bytes_read != sizeof(buff) && feof(stdin)) {
+			if (bytes_read != sizeof(buff) && feof(stdin))
 				quit = 1;
-			}
 		}
 	} else {
-		fprintf(stderr, "%s: Error connecting: %s\n", __progname,
-		       shout_get_error(shout));
-		return (1);
+		fprintf(stderr, "%s: Error connecting: %s\n", __progname, shout_get_error(shout));
+		return 1;
 	}
 
 	shout_close(shout);
 
-	return (0);
+	return 0;
 }
