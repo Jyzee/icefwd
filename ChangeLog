@@ -1,3 +1,8 @@
+0.3.0
+  * Add WebM support
+  * Non-required dependencies removed
+  * Man page updated for icefwd
+  * Forked from Oggfwd
 0.2
   * Makefile: rewrite; more packager-friendly
   * man page
