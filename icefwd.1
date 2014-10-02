@@ -24,8 +24,8 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
+.Op Fl hpv
 .Op Fl f Ar format
-.Op Fl hp
 .Op Fl d Ar description
 .Op Fl g Ar genre
 .Op Fl n Ar name
@@ -34,7 +34,7 @@
 .Ar port
 .Ar password
 .Ar mountpoint
-.Ek
+.Ekq
 .Sh DESCRIPTION
 The
 .Nm
@@ -51,16 +51,18 @@ and
 arguments are mandatory and have to be given in that order.
 .Ss Optional command line parameters
 .Bl -tag -width Ds
+.It Fl h
+Print a short usage summary.
+.It Fl v
+Print version.
+.It Fl n Ar name
+Set the stream
 .It Fl f Ar format
 Set the stream format. Available formats are ogg or webm, default is ogg.
 .It Fl d Ar description
 Set the stream description.
 .It Fl g Ar genre
 Set the stream genre.
-.It Fl h
-Print a short usage summay.
-.It Fl n Ar name
-Set the stream
 .Pq i.e. radio
 name.
 .It Fl p

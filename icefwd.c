@@ -54,7 +54,7 @@ void
 usage(void)
 {
 	printf("Usage: %s "
-	       "[-hp] "
+	       "[-hpv] "
 	       "[-f format] "
 	       "[-m metadata file] "
 	       "[-d description] "
@@ -63,6 +63,17 @@ usage(void)
 	       "[-u URL]\n"
 	       "              address port password mountpoint\n",
 	       __progname);
+	exit(1);
+}
+
+#if defined(__dead)
+__dead void
+#else
+void
+#endif /* __dead */
+version(void)
+{
+	printf("IceFWD version 0.3.0\n");
 	exit(1);
 }
 
@@ -201,8 +212,11 @@ int main(int argc, char **argv) {
 
 	pFlag = 0;
 	format = description = genre = name = url = metafilename = NULL;
-	while ((ch = getopt(argc, argv, "d:g:hn:m:pu:f:")) != -1) {
+	while ((ch = getopt(argc, argv, "vd:g:hn:m:pu:f:")) != -1) {
 		switch (ch) {
+			case 'v':
+				version();
+				break;
 			case 'd':
 				set_argument_string(&description, optarg, 'D');
 				break;
