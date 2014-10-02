@@ -8,6 +8,7 @@
  * This program is provided "as-is", with no explicit or implied warranties of
  * any kind.
  *
+ * Copyright (C) 2014 Jyzee <jyzee.git(at)gmail(dot)com>
  * Copyright (C) 2003-2006, J <j@v2v.cc>,
  *                          rafael2k <rafael(at)riseup(dot)net>,
  *                          Moritz Grimm <gtgbr@gmx.net>
@@ -52,8 +53,9 @@ void
 #endif /* __dead */
 usage(void)
 {
-	printf("usage: %s "
+	printf("Usage: %s "
 	       "[-hp] "
+	       "[-f format] "
 	       "[-m metadata file] "
 	       "[-d description] "
 	       "[-g genre] "
@@ -192,14 +194,14 @@ int main(int argc, char **argv) {
 	unsigned char buff[BUFFERSIZE];
 	int ret, ch;
 	unsigned int pFlag;
-	char *description, *genre, *name, *url;
+	char *format, *description, *genre, *name, *url;
 	size_t bytes_read = 0;
 	unsigned short port;
 	unsigned long long total;
 
 	pFlag = 0;
-	description = genre = name = url = metafilename = NULL;
-	while ((ch = getopt(argc, argv, "d:g:hn:m:pu:")) != -1) {
+	format = description = genre = name = url = metafilename = NULL;
+	while ((ch = getopt(argc, argv, "d:g:hn:m:pu:f:")) != -1) {
 		switch (ch) {
 			case 'd':
 				set_argument_string(&description, optarg, 'D');
@@ -219,6 +221,9 @@ int main(int argc, char **argv) {
 			case 'u':
 				set_argument_string(&url, optarg, 'u');
 				break;
+			case 'f':
+				set_argument_string(&format, optarg, 'f');
+				break;
 			case 'h':
 			default:
 				usage();
@@ -226,6 +231,9 @@ int main(int argc, char **argv) {
 	}
 	argc -= optind;
 	argv += optind;
+
+	if (argc == 0)
+		usage();
 
 	if (argc != 4) {
 		fprintf(stderr, "%s: Wrong number of arguments\n", __progname);
@@ -262,7 +270,11 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	shout_set_format(shout, SHOUT_FORMAT_VORBIS);
+	if (format && strncmp(format, "webm", 4) == 0) {
+		shout_set_format(shout, SHOUT_FORMAT_WEBM);
+	} else {
+		shout_set_format(shout, SHOUT_FORMAT_VORBIS);
+	}
 
 	shout_set_public(shout, pFlag);
 

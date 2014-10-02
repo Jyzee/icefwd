@@ -15,7 +15,7 @@ INSTALL =	install
 PTHREADFLAGS ?=	-pthread
 INCLUDEFLAGS ?=	-I${PREFIX}/include
 LINKFLAGS ?=	-L${PREFIX}/lib
-LINKFLAGS +=	-lshout -logg -lvorbis -ltheora -lspeex
+LINKFLAGS +=	-lshout
 
 all: ${PROG}
 
