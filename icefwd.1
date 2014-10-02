@@ -1,3 +1,4 @@
+.\" Copyright (C) 2014 Jyzee <jyzee.git(at)gmail(dot)com>
 .\" Copyright (C) 2006 Moritz Grimm <gtgbr@gmx.net>
 .\"
 .\" The following legalese applies to this manual only:
@@ -14,15 +15,16 @@
 .\" AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 .\" OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd July 30, 2006
-.Dt OGGFWD 1
+.Dd September 26, 2014
+.Dt ICEFWD 1
 .Os
 .Sh NAME
-.Nm oggfwd
-.Nd "pipe an Ogg stream from stdin to an Icecast server"
+.Nm icefwd
+.Nd "pipe an Ogg/WebM stream from stdin to an Icecast server"
 .Sh SYNOPSIS
 .Nm
 .Bk -words
+.Op Fl f Ar format
 .Op Fl hp
 .Op Fl d Ar description
 .Op Fl g Ar genre
@@ -37,7 +39,7 @@
 The
 .Nm
 utility acts as a minimal source client for Icecast servers.
-It reads an Ogg stream from stdin and forwards it to a server specified on the
+It reads an Ogg/WebM stream from stdin and forwards it to a server specified on the
 command line.
 .Pp
 The
@@ -49,6 +51,8 @@ and
 arguments are mandatory and have to be given in that order.
 .Ss Optional command line parameters
 .Bl -tag -width Ds
+.It Fl f Ar format
+Set the stream format. Available formats are ogg or webm, default is ogg.
 .It Fl d Ar description
 Set the stream description.
 .It Fl g Ar genre
@@ -77,18 +81,26 @@ to an Icecast server, one would pipe that stream to an
 command line such as
 .Pp
 .Bd -literal -offset 4n
-oggfwd -p -n \&"Test radio\&" radio.example.com 8000 password /stream.ogg
+icefwd -p -n \&"Test radio\&" radio.example.com 8000 password /stream.ogg
 .Ed
 .Pp
 Encode an Ogg Vorbis stream, dump it to disk and stream it at the same time:
 .Pp
 .Bd -literal -offset 4n
 oggenc - < input.wav | tee streamdump.ogg \e
-    | oggfwd radio.example.com 8000 password /stream.ogg
+    | icefwd radio.example.com 8000 password /stream.ogg
+.Ed
+.Pp
+Stream WebM to Icecast from a pipe created with mkfifo:
+.Pp
+.Bd -literal -offset 4n
+icefwd -f webm radio.example.com 8000 password /stream.webm < /tmp/streampipe
 .Ed
 .Sh AUTHORS
 Programming by
 .Bl -item -offset indent -compact
+.It
+Jyzee <jyzee.git(at)gmail(dot)com>
 .It
 J^ <j@v2v.cc>
 .It
@@ -98,7 +110,8 @@ Moritz Grimm <gtgbr@gmx.net>
 .El
 .Pp
 This manual was contributed by
-.An Moritz Grimm .
+.An Moritz Grimm ,
+.An edited by Jyzee for icefwd .
 .Sh CAVEATS
 Since the password to the Icecast server is given in clear text on the command
 line, other
