@@ -1,3 +1,6 @@
+0.3.1
+  * Use SHOUT_FORMAT_OGG instead of SHOUT_FORMAT_VORBIS (deprecated)
+  * Makefile: fix build on Ubuntu (and probably others)
 0.3.0
   * Add WebM support
   * Non-required dependencies removed

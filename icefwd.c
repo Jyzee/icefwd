@@ -73,7 +73,7 @@ void
 #endif /* __dead */
 version(void)
 {
-	printf("IceFWD version 0.3.0\n");
+	printf("IceFWD version 0.3.1\n");
 	exit(1);
 }
 
