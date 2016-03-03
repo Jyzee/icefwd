@@ -287,7 +287,7 @@ int main(int argc, char **argv) {
 	if (format && strncmp(format, "webm", 4) == 0) {
 		shout_set_format(shout, SHOUT_FORMAT_WEBM);
 	} else {
-		shout_set_format(shout, SHOUT_FORMAT_VORBIS);
+		shout_set_format(shout, SHOUT_FORMAT_OGG);
 	}
 
 	shout_set_public(shout, pFlag);
