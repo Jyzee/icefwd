@@ -20,7 +20,7 @@ LINKFLAGS +=	-lshout
 all: ${PROG}
 
 ${PROG}: ${SRC}
-	${CC} ${CFLAGS} ${PTHREADFLAGS} ${INCLUDEFLAGS} ${LINKFLAGS} -o ${PROG} $<
+	${CC} ${CFLAGS} ${PTHREADFLAGS} ${INCLUDEFLAGS} -o ${PROG} $< ${LINKFLAGS}
 
 install: ${PROG}
 	${INSTALL} -c -m 555 -o root -g bin ${PROG} ${BINDIR}
