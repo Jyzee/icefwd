@@ -15,7 +15,7 @@
 .\" AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 .\" OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
-.Dd September 26, 2014
+.Dd October 19, 2016
 .Dt ICEFWD 1
 .Os
 .Sh NAME
@@ -27,6 +27,7 @@
 .Op Fl hpv
 .Op Fl f Ar format
 .Op Fl d Ar description
+.Op Fl m Ar metadata file
 .Op Fl g Ar genre
 .Op Fl n Ar name
 .Op Fl u Ar URL
@@ -61,6 +62,8 @@ Set the stream
 Set the stream format. Available formats are ogg or webm, default is ogg.
 .It Fl d Ar description
 Set the stream description.
+.It Fl m Ar metadata file
+Set a file holding stream meta data.
 .It Fl g Ar genre
 Set the stream genre.
 .Pq i.e. radio
