@@ -31,6 +31,7 @@
 .Op Fl g Ar genre
 .Op Fl n Ar name
 .Op Fl u Ar URL
+.Op Fl T Ar TLS mode
 .Ar address
 .Ar port
 .Ar password
@@ -72,6 +73,8 @@ name.
 Allow the stream to be made public in stream directories.
 .It Fl u Ar URL
 Set the stream URL.
+.It Fl T Ar TLS mode
+This sets the TLS (encryption) mode. Valid values are "disabled" (no encryption), "auto" (any encryption if available), "auto_no_plain" (any encryption), "rfc2818" (encryption based on RFC2818) and "rfc2817" (encryption based on RFC2817). For most users the default mode "auto" should work just fine.
 .El
 .Pp
 .Nm
@@ -112,11 +115,13 @@ J^ <j@v2v.cc>
 rafael2k <rafael@riseup.net>
 .It
 Moritz Grimm <gtgbr@gmx.net>
+.It
+Philipp Schafft <lion@lion.leolix.org>
 .El
 .Pp
 This manual was contributed by
-.An Moritz Grimm ,
-.An edited by Jyzee for icefwd .
+.An Moritz Grimm and updated by Philipp Schafft.
+.An Edited by Jyzee for icefwd.
 .Sh CAVEATS
 Since the password to the Icecast server is given in clear text on the command
 line, other

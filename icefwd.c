@@ -8,10 +8,11 @@
  * This program is provided "as-is", with no explicit or implied warranties of
  * any kind.
  *
- * Copyright (C) 2014 Jyzee <jyzee.git(at)gmail(dot)com>
  * Copyright (C) 2003-2006, J <j@v2v.cc>,
  *                          rafael2k <rafael(at)riseup(dot)net>,
  *                          Moritz Grimm <gtgbr@gmx.net>
+ * Copyright (C) 2014-2016  Jyzee <jyzee.git(at)gmail(dot)com>
+ * Copyright (C) 2015       Philipp Schafft <lion@lion.leolix.org>
  *
  * thanx to rhatto <rhatto (AT) riseup (DOT) net> and others at submidialogia :-P
  */
@@ -56,12 +57,15 @@ usage(void)
 	printf("Usage: %s "
 	       "[-hpv] "
 	       "[-f format] "
-	       "[-m metadata file] "
 	       "[-d description] "
+	       "[-m metadata file] "
 	       "[-g genre] "
 	       "[-n name] "
-	       "[-u URL]\n"
-	       "              address port password mountpoint\n",
+	       "[-u URL] "
+#ifdef SHOUT_TLS
+	       "[-T {disabled|auto|auto_no_plain|rfc2818|rfc2817}] "
+#endif
+	       "\n              address port password mountpoint\n",
 	       __progname);
 	exit(1);
 }
@@ -201,6 +205,26 @@ void set_argument_string(char **param, char *opt, char optname) {
 	snprintf(*param, siz, "%s", opt);
 }
 
+#ifdef SHOUT_TLS
+void set_tls_mode(int *tls_mode, char *opt, char optname) {
+	if (0==strcasecmp("DISABLED", opt)) {
+		*tls_mode = SHOUT_TLS_DISABLED;
+	} else if (0==strcasecmp("AUTO", opt)) {
+		*tls_mode = SHOUT_TLS_AUTO;
+	} else if (0==strcasecmp("AUTO_NO_PLAIN", opt)) {
+		*tls_mode = SHOUT_TLS_AUTO_NO_PLAIN;
+	} else if (0==strcasecmp("RFC2818", opt)) {
+		*tls_mode = SHOUT_TLS_RFC2818;
+	} else if (0==strcasecmp("RFC2817", opt)) {
+		*tls_mode = SHOUT_TLS_RFC2817;
+	} else {
+		fprintf(stderr, "%s: Invalid value for -%c.\n", __progname, optname);
+		usage();
+		exit(1);
+	}
+}
+#endif
+
 int main(int argc, char **argv) {
 	unsigned char buff[BUFFERSIZE];
 	int ret, ch;
@@ -209,10 +233,13 @@ int main(int argc, char **argv) {
 	size_t bytes_read = 0;
 	unsigned short port;
 	unsigned long long total;
+#ifdef SHOUT_TLS
+	int tls_mode = SHOUT_TLS_AUTO;
+#endif
 
 	pFlag = 0;
 	format = description = genre = name = url = metafilename = NULL;
-	while ((ch = getopt(argc, argv, "vd:g:hn:m:pu:f:")) != -1) {
+	while ((ch = getopt(argc, argv, "vd:g:hn:m:pu:f:T:")) != -1) {
 		switch (ch) {
 			case 'v':
 				version();
@@ -238,6 +265,11 @@ int main(int argc, char **argv) {
 			case 'f':
 				set_argument_string(&format, optarg, 'f');
 				break;
+			case 'T':
+#ifdef SHOUT_TLS
+				set_tls_mode(&tls_mode, optarg, 'T');
+				break;
+#endif
 			case 'h':
 			default:
 				usage();
@@ -258,6 +290,13 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "%s: Could not allocate shout_t\n", __progname);
 		return 1;
 	}
+
+#ifdef SHOUT_TLS
+	if (shout_set_tls(shout, tls_mode) != SHOUTERR_SUCCESS) {
+		fprintf(stderr, "%s: Error setting TLS mode: %s\n", __progname, shout_get_error(shout));
+		return 1;
+	}
+#endif
 
 	if (shout_set_host(shout, argv[0]) != SHOUTERR_SUCCESS) {
 		fprintf(stderr, "%s: Error setting hostname: %s\n", __progname, shout_get_error(shout));
